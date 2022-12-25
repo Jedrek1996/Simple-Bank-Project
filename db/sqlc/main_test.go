@@ -13,22 +13,26 @@ import (
 // Package db contains all the unit tests only use testing.M in main
 var testQueries *Queries
 
+var testDB *sql.DB
+
 const (
 	dbDriver = "postgres"
 	dbSource = "postgresql://root:secret@localhost:5432/simple_bank?sslmode=disable"
 )
 
 func TestMain(m *testing.M) {
-	conn, err := sql.Open(dbDriver, dbSource)
+
+	var err error
+
+	testDB, err := sql.Open(dbDriver, dbSource)
 
 	if err != nil {
 		log.Fatal("Error connecting to db:", err)
 	}
 
-	testQueries = New(conn)
+	testQueries = New(testDB)
 
 	os.Exit(m.Run())
 
 	fmt.Println(testQueries)
-	fmt.Println(conn)
 }
