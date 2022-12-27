@@ -8,6 +8,8 @@ import (
 
 // Composition, extend struct functionallity instead of inheritance
 // By embedding queries inside store all individual queries will be avaiable to store
+
+// Store - A batch of SQL code that can be used over and over again, dont need to keep calling everyt
 type Store struct {
 	*Queries
 	db *sql.DB
@@ -23,6 +25,7 @@ func NewStore(db *sql.DB) *Store {
 // Create a db transaction, create a new query and call the callback functions of the transaction
 func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
 
+	//New transaction
 	tx, err := store.db.BeginTx(ctx, nil)
 
 	if err != nil {
@@ -39,7 +42,7 @@ func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
 		}
 		return err
 	}
-	return tx.Commit()
+	return tx.Commit() //Commit transaction``
 }
 
 type TransferTxParam struct {
@@ -83,6 +86,7 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParam) (Transf
 		if err != nil {
 			return err
 		}
+		
 		result.FromEntry, err = q.CreateEntry(ctx, CreateEntryParams{
 			AccountID: arg.FromAccountID,
 			Amount:    -arg.Amount,
@@ -102,6 +106,16 @@ func (store *Store) TransferTx(ctx context.Context, arg TransferTxParam) (Transf
 		}
 
 		//update accounts balance
+
+		// account1, err := q.GetAccount(ctx, arg.FromAccountID)
+		// if err != nil {
+		// 	return err
+		// }
+
+		// result.FromAccount, err = q.UpdateAccount(ctx, UpdateAccountParams{
+		// 	ID: arg.FromAccountID,
+		// 	Balance: account1.Balance - arg.Amount,
+		// })
 
 		return nil
 	})
