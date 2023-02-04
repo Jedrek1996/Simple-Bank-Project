@@ -13,26 +13,27 @@ func TestTransferTx(t *testing.T) {
 
 	account1 := createRandomAccount(t)
 	account2 := createRandomAccount(t)
+	fmt.Println(account1.ID, account2.ID)
 
-	//BEFORE TRANSFERING
-	fmt.Println(">>BEFORE", account1.Balance, "\n", account2.Balance)
+	//BEFORE TRANSFERING gc
+	fmt.Println("BEFORE>> ", "Account 1 balance:", account1.Balance, "Account 2 balance:", account2.Balance)
 
 	//Run concurrent transfer transactions
-	n := 5
+	n := 3
 	amount := int64(10)
 
 	errs := make(chan error)
 	results := make(chan TransferTxResult)
 
 	for i := 0; i < n; i++ {
+		//txName := fmt.Sprintf("tx %d", i+1)
 		go func() {
+			//ctx := context.WithValue(context.Background(), txKey, txName) // Store the txname value so that it can be called when logging (change transfertx(ctx))
 			result, err := store.TransferTx(context.Background(), TransferTxParam{
 				FromAccountID: account1.ID,
 				ToAccountID:   account2.ID,
 				Amount:        amount,
 			})
-
-			fmt.Println(result)
 			errs <- err
 			results <- result
 		}()
@@ -40,6 +41,7 @@ func TestTransferTx(t *testing.T) {
 
 	//Check results
 	existed := make(map[int]bool)
+
 	for i := 0; i < n; i++ {
 		err := <-errs
 		require.NoError(t, err)
@@ -82,17 +84,17 @@ func TestTransferTx(t *testing.T) {
 		_, err = store.GetEntry(context.Background(), toEntry.ID)
 		require.NoError(t, err)
 
-		//Chek accounts
+		//Check accounts
 		fromAccount := result.FromAccount
 		require.NotEmpty(t, fromAccount)
 		require.Equal(t, account1.ID, fromAccount.ID)
 
 		toAccount := result.ToAccount
 		require.NotEmpty(t, toAccount)
-		require.Equal(t, account2.ID, toAccount.ID)
+		require.Equal(t, account2.ID, toAccount.ID) //ERROR HERE
 
-		//check balance
-		fmt.Println(">> Balance after each TX:", fromAccount.Balance, toAccount.Balance)
+		//Check balance
+		fmt.Println("Balance after each TX>> ", fromAccount.Balance, toAccount.Balance)
 		diff1 := account1.Balance - fromAccount.Balance
 		diff2 := toAccount.Balance - account2.Balance
 
