@@ -1,6 +1,10 @@
 postgres:
 	docker run --name postgres12 -p 5430:5432 -e POSTGRES_USER=root -e POSTGRES_PASSWORD=secret -d postgres:12-alpine
 
+
+execDockerPG:
+	docker exec -it postgres12 psql -U root -d simple_bank
+
 createdb:
 	docker exec -it postgres12 createdb --username=root --owner=root simple_bank
 
@@ -19,7 +23,7 @@ sqlc:
 test:
 	go test -v -cover ./...
 
-.PHONY: createdb dropdb postgres migrateup migratedown
+.PHONY: execDockerPG createdb dropdb postgres migrateup migratedown
 
 # lsof -i :5432
 # kill <PID> 
