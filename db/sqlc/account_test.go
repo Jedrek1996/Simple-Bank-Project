@@ -3,6 +3,7 @@ package db
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"simplebank/db/util"
 	"testing"
 	"time"
@@ -18,7 +19,7 @@ func createRandomAccount(t *testing.T) Account {
 	}
 
 	account, err := testQueries.CreateAccount(context.Background(), arg)
-
+	fmt.Println(account)
 	require.NoError(t, err)
 
 	require.NotEmpty(t, account)
